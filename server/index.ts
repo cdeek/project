@@ -16,7 +16,9 @@ import {
   orderRoutes,
   paymentRoutes,
   wishlisthtRoutes,
-  couponRoutes
+  couponRoutes,
+  reportRoutes,
+  pageRoutes
 } from './routes'; 
 
 dotenv.config(); 
@@ -30,7 +32,7 @@ const httpServer = http.createServer(app);
 const nextApp = next({ 
   dev,
   turbo: true,
-  dir: '../src',
+  dir: '.',
   conf: {}
 });
 const nextHandler = nextApp.getRequestHandler();

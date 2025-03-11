@@ -6,6 +6,8 @@ import orderRoutes from './orderRoutes';
 import paymentRoutes from './paymentRoutes';
 import wishlistRoutes from './wishlistRoutes';
 import couponRoutes from './couponRoutes';
+import reportRoutes from './reportRoutes';
+import pageRoutes from './pageRoutes';
 
 export {
   productRoutes,
@@ -15,5 +17,7 @@ export {
   orderRoutes,
   paymentRoutes,
   wishlistRoutes,
-  couponRoutes
+  couponRoutes,
+  reportRoutes,
+  pageRoutes
 };
