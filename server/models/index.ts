@@ -47,11 +47,35 @@ ProductSchema.pre("save", function (next) {
 });
 export const Product = mongoose.model('Product', ProductSchema); 
 
+const SubcategorySchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  slug: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+  },
+});
 
 const CategorySchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, unique: true },
-    slug: { type: String, unique: true, lowercase: true },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+    },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+    },
+    subcategories: [SubcategorySchema], // Array of subcategories
   },
   { timestamps: true }
 );

@@ -10,9 +10,8 @@ import React, {
   useState,
 } from 'react'
 
-import { Product, User } from '@/backend/types'
+import { Product, User } from '../../../payload/payload-types'
 import { useAuth } from '../Auth'
-import { getMe } from '../../_api/getMe'
 import { CartItem, cartReducer } from './reducer'
 
 export type CartContext = {
@@ -37,12 +36,16 @@ const arrayHasItems = array => Array.isArray(array) && array.length > 0
 
 // Step 1: Check local storage for a cart
 // Step 2: If there is a cart, fetch the products and hydrate the cart
+// Step 3: Authenticate the user
+// Step 4: If the user is authenticated, merge the user's cart with the local cart
+// Step 4B: Sync the cart to Payload and clear local storage
+// Step 5: If the user is logged out, sync the cart to local storage only
 
 export const CartProvider = props => {
   // const { setTimedNotification } = useNotifications();
   const { children } = props
-  const { status: authStatus } = useAuth()
-  
+  const { user, status: authStatus } = useAuth()
+
   const [cart, dispatchCart] = useReducer(cartReducer, {
     items: [],
   })
@@ -73,7 +76,7 @@ export const CartProvider = props => {
           const initialCart = await Promise.all(
             parsedCart.items.map(async ({ product, quantity }) => {
               const res = await fetch(
-                `/api/products/${product}`,
+                `${process.env.NEXT_PUBLIC_SERVER_URL}/api/products/${product}`,
               )
               const data = await res.json()
               return {
@@ -103,9 +106,32 @@ export const CartProvider = props => {
     }
   }, [])
 
-  // every time the cart changes,
+  // authenticate the user and if logged in, merge the user's cart with local state
+  // only do this after we have initialized the cart to ensure we don't lose any items
   useEffect(() => {
-    if (!hasInitialized.current) return;
+    if (!hasInitialized.current) return
+
+    if (authStatus === 'loggedIn') {
+      // merge the user's cart with the local state upon logging in
+      dispatchCart({
+        type: 'MERGE_CART',
+        payload: user?.cart,
+      })
+    }
+
+    if (authStatus === 'loggedOut') {
+      // clear the cart from local state after logging out
+      dispatchCart({
+        type: 'CLEAR_CART',
+      })
+    }
+  }, [user, authStatus])
+
+  // every time the cart changes, determine whether to save to local storage or Payload based on authentication status
+  // upon logging in, merge and sync the existing local cart to Payload
+  useEffect(() => {
+    // wait until we have attempted authentication (the user is either an object or `null`)
+    if (!hasInitialized.current || user === undefined) return
 
     // ensure that cart items are fully populated, filter out any items that are not
     // this will prevent discontinued products from appearing in the cart
@@ -126,9 +152,37 @@ export const CartProvider = props => {
         })
         .filter(Boolean) as CartItem[],
     }
-    localStorage.setItem('cart', JSON.stringify(flattenedCart));
+
+    if (user) {
+      try {
+        const syncCartToPayload = async () => {
+          const req = await fetch(`/api/users/${user._id}`, {
+            // Make sure to include cookies with fetch
+            credentials: 'include',
+            method: 'PATCH',
+            body: JSON.stringify({
+              cart: flattenedCart,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          })
+
+          if (req.ok) {
+            localStorage.setItem('cart', '[]')
+          }
+        }
+
+        syncCartToPayload()
+      } catch (e) {
+        console.error('Error while syncing cart to Payload.') // eslint-disable-line no-console
+      }
+    } else {
+      localStorage.setItem('cart', JSON.stringify(flattenedCart))
+    }
+
     setHasInitialized(true)
-  }, [cart])
+  }, [user, cart])
 
   const isProductInCart = useCallback(
     (incomingProduct: Product): boolean => {

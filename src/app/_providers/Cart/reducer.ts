@@ -1,3 +1,9 @@
+import type { CartItems, Product, User } from '../../../payload/payload-types'
+
+export type CartItem = CartItems[0]
+
+type CartType = User['cart']
+
 type CartAction =
   | {
       type: 'SET_CART'
@@ -19,20 +25,52 @@ type CartAction =
       type: 'CLEAR_CART'
     }
 
-export const cartReducer = (cart, action: CartAction) => {
+export const cartReducer = (cart: CartType, action: CartAction): CartType => {
   switch (action.type) {
     case 'SET_CART': {
       return action.payload
+    }
+
+    case 'MERGE_CART': {
+      const { payload: incomingCart } = action
+
+      const syncedItems: CartItem[] = [
+        ...(cart?.items || []),
+        ...(incomingCart?.items || []),
+      ].reduce((acc: CartItem[], item) => {
+        // remove duplicates
+        const productId = typeof item.product === 'string' ? item.product : item?.product?.id
+
+        const indexInAcc = acc.findIndex(({ product }) =>
+          typeof product === 'string' ? product === productId : product?.id === productId,
+        ) // eslint-disable-line function-paren-newline
+
+        if (indexInAcc > -1) {
+          acc[indexInAcc] = {
+            ...acc[indexInAcc],
+            // customize the merge logic here, e.g.:
+            // quantity: acc[indexInAcc].quantity + item.quantity
+          }
+        } else {
+          acc.push(item)
+        }
+        return acc
+      }, [])
+
+      return {
+        ...cart,
+        items: syncedItems,
+      }
     }
 
     case 'ADD_ITEM': {
       // if the item is already in the cart, increase the quantity
       const { payload: incomingItem } = action
       const productId =
-        typeof incomingItem.product === 'string' ? incomingItem.product : incomingItem?.product?._id
+        typeof incomingItem.product === 'string' ? incomingItem.product : incomingItem?.product?.id
 
       const indexInCart = cart?.items?.findIndex(({ product }) =>
-        typeof product === 'string' ? product === productId : product?._id === productId,
+        typeof product === 'string' ? product === productId : product?.id === productId,
       ) // eslint-disable-line function-paren-newline
 
       let withAddedItem = [...(cart?.items || [])]

@@ -5,14 +5,12 @@ import auth from "../middleware/auth";
 const router = express.Router();
 
 // Create a Category (Admin Only)
-router.post("/", authMiddleware, async (req, res) => {
+router.post("/", auth, async (req, res) => {
   if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
 
-  const { name } = req.body;
-  const slug = name.toLowerCase().split(" ").join("-");
-
   try {
-    const category = new Category({ name, slug });
+    const { name, slug, subcategories } = req.body;
+    const category = new Category({ name, slug, subcategories });
     await category.save();
     res.status(201).json(category);
   } catch (err) {
@@ -22,16 +20,23 @@ router.post("/", authMiddleware, async (req, res) => {
 
 // Get All Categories
 router.get("/", async (req, res) => {
-  const categories = await Category.find();
-  res.json(categories);
+  try {
+    const categories = await Category.find();
+    res.json(categories);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// Get a Single Category
-router.get("/:slug", async (req, res) => {
-  const category = await Category.findOne({ slug: req.params.slug });
-  if (!category) return res.status(404).json({ message: "Category not found" });
-
-  res.json(category);
+// Get a single category by ID
+router.get("/:id", async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+    if (!category) return res.status(404).json({ message: "Category not found" });
+    res.json(category);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Update Category (Admin Only)
