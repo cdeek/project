@@ -11,8 +11,8 @@ router.post("/add/:productId", auth, async (req, res) => {
     const product = await Product.findById(req.params.productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    if (!user.wishlist.includes(product._id)) {
-      user.wishlist.push(product._id);
+    if (!user.cart.includes(product._id)) {
+      user.cart.push(product._id);
       await user.save();
     }
 

@@ -12,7 +12,7 @@ import {
   productRoutes, authRoutes,
   categoryRoutes, reviewRoutes,
   orderRoutes, paymentRoutes,
-  wishlisthtRoutes, couponRoutes,
+  cartRoutes, couponRoutes,
   reportRoutes, pageRoutes
 } from './routes'; 
 
@@ -47,7 +47,7 @@ const start = async () => {
     app.use("/api/review", reviewRoutes);
     app.use("/api/order", orderRoutes);
     app.use("/api/payment", paymentRoutes);
-    app.use("/api/wishlist", wishlisthtRoutes);
+    app.use("/api/cart", cartRoutes);
     app.use("/api/coupon", couponRoutes);  
     app.use("/api/page", pageRoutes);  
     app.use("/api/report", reportRoutes);  
@@ -60,7 +60,7 @@ const start = async () => {
     }); 
 
     // Start the Express server
-    httpServer.listen(PORT, () => {
+    httpServer.listen(port, () => {
       console.log(`>🚀 Ready on port ${port}`);;
     });
   } catch (err) {
