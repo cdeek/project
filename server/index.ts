@@ -9,16 +9,11 @@ import http from 'http';
 import connectDb from './config/db.ts';
 
 import {
-  productRoutes,
-  authRoutes,
-  categoryRoutes,
-  reviewRoutes,
-  orderRoutes,
-  paymentRoutes,
-  wishlisthtRoutes,
-  couponRoutes,
-  reportRoutes,
-  pageRoutes
+  productRoutes, authRoutes,
+  categoryRoutes, reviewRoutes,
+  orderRoutes, paymentRoutes,
+  wishlisthtRoutes, couponRoutes,
+  reportRoutes, pageRoutes
 } from './routes'; 
 
 dotenv.config(); 
@@ -54,9 +49,11 @@ const start = async () => {
     app.use("/api/payment", paymentRoutes);
     app.use("/api/wishlist", wishlisthtRoutes);
     app.use("/api/coupon", couponRoutes);  
+    app.use("/api/page", pageRoutes);  
+    app.use("/api/report", reportRoutes);  
 
     // Handle all other requests with Next.js
-    app.all('*all', (req, res) => { 
+    app.use('*all', (req, res) => { 
       if (req.path.startsWith('/api')) return;
       const parsedUrl = parse(req.url, true);
       return nextHandler(req, res, parsedUrl);

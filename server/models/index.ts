@@ -7,7 +7,8 @@ const UserSchema = new Schema({
   purchases: { type: [Schema.Types.Mixed], default: null },
   cart: {
     items: { type: Schema.Types.Mixed, default: null }
-  },
+  }, 
+  publishedProducts: [mongoose.Schema.Types.ObjectId],
   isReturningCustomer: {type: Boolean, default: false},
   disabled: {type: Boolean, default: false},
   password: { type: String, required: true },
@@ -31,11 +32,11 @@ const ProductSchema = new Schema({
   category: { type: Schema.Types.ObjectId, ref: 'Category', required: true},
   images: [String],
   video: String, 
+  keywords: [String],
   stocks: {type: Number, required: true, default: 0},
   reviews: [ReviewSchema],
   averageRating: { type: Number, default: 0 },
   reviewCount: { type: Number, default: 0 },
-  sellerId: { type: Schema.Types.ObjectId, ref: 'User', required: true},
   status: { type: String, enum: ["in stock", "out of stock"], default: "in stock" }
 }, {timestamps: true});
 
@@ -64,14 +65,15 @@ const OrderSchema = new mongoose.Schema(
     email: String,
     phone: Number,
     products: [
-      {
-        product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+      { 
+        title: String, 
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
         quantity: { type: Number, required: true },
       },
     ],
     totalAmount: { type: Number, required: true },
     paymentStatus: { type: String, enum: ["pending", "paid", "failed"], default: "pending" },
-    paymentMethod: { type: String, enum: ["paypal", "stripe", "crypto", "transfer", "card"], required: true },
+    paymentMethod: { type: String, enum: ["paypal", "crypto", "transfer", "card"], required: true },
     transactionId: { type: String },
     orderStatus: { type: String, enum: ["pending", "processing", "shipped", "delivered", "cancelled"], default: "pending" },
     shippingAddress: { type: String, required: true },

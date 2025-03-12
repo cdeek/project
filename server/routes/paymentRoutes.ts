@@ -1,5 +1,5 @@
 import express from "express";
-import { paypal, stripe } from "../config/payment";
+import { paypal } from "../config/payment";
 import { Order } from "../models";
 import auth from "../middleware/auth";
 
@@ -23,34 +23,11 @@ router.post("/paypal", auth, async (req, res) => {
     };
 
     paypal.payment.create(paymentJson, (error, payment) => {
-      if (error) return res.status(500).json({ error: error.response });
+      if (error) return res.status(500).json({ error: error.response }); 
+      order.orderStatus = payment.status;
+      await order.save();
       res.json({ approvalUrl: payment.links.find(link => link.rel === "approval_url").href });
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Stripe Payment Route
-router.post("/stripe", auth, async (req, res) => {
-  const { orderId, token } = req.body;
-  try {
-    const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ message: "Order not found" });
-
-    const charge = await stripe.charges.create({
-      amount: order.totalAmount * 100, // Convert to cents
-      currency: "usd",
-      description: `Order #${order._id}`,
-      source: token,
-    });
-
-    order.paymentStatus = "paid";
-    order.paymentMethod = "stripe";
-    order.transactionId = charge.id;
-    await order.save();
-
-    res.json({ message: "Payment successful", order });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

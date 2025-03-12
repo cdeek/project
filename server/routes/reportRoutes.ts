@@ -6,30 +6,81 @@ const router = express.Router();
 // Get Sales Report (Revenue, Orders, Best Sellers)
 router.get("/sales", async (req, res) => {
   try {
-    const { startDate, endDate } = req.query;
+    const currentYear = new Date().getFullYear();
+    const last30Days = new Date();
+    last30Days.setDate(last30Days.getDate() - 30);
 
-    // Filter by date range (optional)
-    const filter = {};
-    if (startDate && endDate) {
-      filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    }
+    // Sales per day (Last 30 Days)
+    const salesPerDay = await Order.aggregate([
+      {
+        $match: { createdAt: { $gte: last30Days } },
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          totalRevenue: { $sum: "$totalAmount" },
+          totalOrders: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } }, // Sort by date
+    ]);
 
-    const totalRevenue = await Order.aggregate([
-      { $match: filter },
-      { $group: { _id: null, totalRevenue: { $sum: "$totalAmount" }, totalOrders: { $sum: 1 } } }
+    // Sales per month (Current Year)
+    const salesPerMonth = await Order.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: new Date(`${currentYear}-01-01`),
+            $lt: new Date(`${currentYear + 1}-01-01`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          totalRevenue: { $sum: "$totalAmount" },
+          totalOrders: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } }, // Sort by month
+    ]);
+
+    // Sales per year
+    const salesPerYear = await Order.aggregate([
+      {
+        $group: {
+          _id: { $year: "$createdAt" },
+          totalRevenue: { $sum: "$totalAmount" },
+          totalOrders: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } }, // Sort by year
+    ]);
+
+    // All-time sales
+    const allTimeSales = await Order.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$totalAmount" },
+          totalOrders: { $sum: 1 },
+        },
+      },
     ]);
 
     const bestSellers = await Order.aggregate([
       { $unwind: "$products" },
-      { $group: { _id: "$products.productId", sold: { $sum: "$products.quantity" } } },
+      { $group: { _id: "$products._id", sold: { $sum: "$products.quantity" } } },
       { $sort: { sold: -1 } },
       { $limit: 5 }
     ]);
 
     res.json({
-      totalRevenue: totalRevenue[0]?.totalRevenue || 0,
-      totalOrders: totalRevenue[0]?.totalOrders || 0,
-      bestSellers
+      bestSellers,
+      salesPerDay,
+      salesPerMonth,
+      salesPerYear,
+      allTimeSales
     });
   } catch (error) {
     res.status(500).json({ error: "Server Error" });

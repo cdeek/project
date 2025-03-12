@@ -12,7 +12,7 @@ router.post('/', auth, upload.fields([
   ]), async (req, res) => {
   // Empty fields validation 
   if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
-  const { title, description, price, category, tags } = req.body;
+  const { title, description, price, category,keywords } = req.body;
   
   try {
     // Check if category exists
@@ -25,7 +25,13 @@ router.post('/', auth, upload.fields([
     const video = (req.files as { [fieldname: string]: Express.Multer.File[] }["video"] || [])[0]?.path || null;
 
     const newProduct = new Product({ 
-
+     title, 
+     description, 
+     price,
+     category,
+     keywords,
+     images,
+     video,
     });
 
     await newProduct.save();
@@ -115,7 +121,7 @@ router.put("/:id", auth, async (req, res) => {
 // Update product stock
 router.put("/:id/stock", auth, async (req, res) => {
     if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
-    const { stock } = req.body;
+    const { stock } = req.query;
 
     try {
         const product = await Product.findById(req.params.id);
