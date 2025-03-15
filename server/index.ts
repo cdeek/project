@@ -23,22 +23,24 @@ const dev = process.env.NODE_ENV !== 'production'
 const app = express(); 
 const httpServer = http.createServer(app);
 
-// Initialize Next.js
-const nextApp = next({ 
-  dev,
-  turbo: true,
-  dir: '.',
-  conf: {}
-});
-const nextHandler = nextApp.getRequestHandler();
 
 const start = async () => {
   try { 
     // connect to dataBase
-    await connectDb(); 
+    // await connectDb(); 
+
+    // Initialize Next.js
+    const nextApp = next({ dev, turbo: true }); 
+    const nextHandler = nextApp.getRequestHandler(); 
 
     // Prepare Next.js app
     await nextApp.prepare(); 
+    
+    // Middleware
+    app.use(bodyParser.json());
+    app.use(express.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(cookieParser()); 
 
     // routes 
     app.use("/api/products", productRoutes);
@@ -53,15 +55,15 @@ const start = async () => {
     app.use("/api/report", reportRoutes);  
 
     // Handle all other requests with Next.js
-    app.use('*all', (req, res) => { 
+    app.all('*', (req, res) => { 
       if (req.path.startsWith('/api')) return;
-      const parsedUrl = parse(req.url, true);
+      const parsedUrl = parse(req.url!, true);
       return nextHandler(req, res, parsedUrl);
     }); 
 
     // Start the Express server
     httpServer.listen(port, () => {
-      console.log(`>🚀 Ready on port ${port}`);;
+      console.log(`>🚀 Ready on port ${port} as ${ dev ? "development" : "production"}`)
     });
   } catch (err) {
     if (err instanceof Error) {

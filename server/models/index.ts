@@ -12,7 +12,6 @@ const UserSchema = new Schema({
   isReturningCustomer: {type: Boolean, default: false},
   disabled: {type: Boolean, default: false},
   password: { type: String, required: true },
-  wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
 }, {timestamps: true});
 export const User = mongoose.model('User', UserSchema);
 
@@ -42,7 +41,7 @@ const ProductSchema = new Schema({
 
 // Auto-update product status based on stock
 ProductSchema.pre("save", function (next) {
-    this.status = this.stock > 0 ? "in stock" : "out of stock";
+    this.status = this.stocks > 0 ? "in stock" : "out of stock";
     next();
 });
 export const Product = mongoose.model('Product', ProductSchema); 

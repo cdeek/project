@@ -11,16 +11,16 @@ router.post("/", auth, async (req, res) => {
 
     if (!products || products.length === 0) return res.status(400).json({ message: "No products in the order" });
 
-    let totalAmount = 0;
+    let totalAmount: number = 0;
 
     // Check product availability and calculate total price
     for (let item of products) {
-      const product = await Product.findById(item.product);
-      if (!product || product.stock < item.quantity) {
+      const product: any = await Product.findById(item.product);
+      if (!product || product.stocks < item.quantity) {
         return res.status(400).json({ message: `Product ${product?.name || "not found"} is out of stock` });
       }
-      totalAmount += product.price * item.quantity;
-      product.stock -= item.quantity;
+      totalAmount += (product.price * item.quantity);
+      product.stocks -= item.quantity;
       await product.save();
     }
 

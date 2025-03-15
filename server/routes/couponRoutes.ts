@@ -1,5 +1,5 @@
 import express from "express";
-import { Coupon } from "../models");
+import { Coupon } from "../models";
 import auth from "../middleware/auth";
 
 const router = express.Router();

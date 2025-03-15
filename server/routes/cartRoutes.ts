@@ -11,12 +11,12 @@ router.post("/add/:productId", auth, async (req, res) => {
     const product = await Product.findById(req.params.productId);
     if (!product) return res.status(404).json({ message: "Product not found" });
 
-    if (!user.cart.includes(product._id)) {
-      user.cart.push(product._id);
+    if (!user.cart.items.includes(product._id)) {
+      user.cart.items.push(product._id);
       await user.save();
     }
 
-    res.json({ message: "Product added to wishlist", wishlist: user.wishlist });
+    res.json({ message: "Product added to wishlist", cart: user.cart });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -26,10 +26,10 @@ router.post("/add/:productId", auth, async (req, res) => {
 router.delete("/remove/:productId", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
-    user.wishlist = user.wishlist.filter((id) => id.toString() !== req.params.productId);
+    user.cart.items = user.cart.items.filter((id) => id.toString() !== req.params.productId);
     await user.save();
 
-    res.json({ message: "Product removed from wishlist", wishlist: user.wishlist });
+    res.json({ message: "Product removed from wishlist", cart: user.cart });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -39,7 +39,7 @@ router.delete("/remove/:productId", auth, async (req, res) => {
 router.get("/", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate("wishlist", "name price");
-    res.json({ wishlist: user.wishlist });
+    res.json({ cart: user.cart });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

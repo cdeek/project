@@ -2,9 +2,9 @@
 import { useState, ChangeEvent } from "react";
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/app/_providers/Auth";
-import { Message } from "@/app/_components/Message";
-import { Input } from "@/app/_components/ui/input";
-import { Textarea } from "@/app/_components/ui/textarea";
+import { Message } from "@/components/Message";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Select,
   SelectContent,
@@ -13,7 +13,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-  } from "@/app/_components/ui/select";
+  } from "@/components/ui/select";
 
 export default function AddProduct() {
   const [tags, setTags] = useState<string[]>([]);
