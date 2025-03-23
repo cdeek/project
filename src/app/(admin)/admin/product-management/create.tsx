@@ -1,8 +1,8 @@
 "use client";
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent } from "react"; 
+import { useToast } from "@/components/ui/use-toast"
 import { useForm } from "react-hook-form";
 import { useAuth } from "@/app/_providers/Auth";
-import { Message } from "@/components/Message";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { 
@@ -29,6 +29,7 @@ export default function AddProduct() {
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>();
   const { token } = useAuth();
+  const { toast } = useToast(); 
 
   // Helper functions for managing lists (tags and keywords)
   const handleAddItem = (input: string, list: string[], setter: (value: string[]) => void, resetInput: () => void) => {
@@ -76,7 +77,7 @@ export default function AddProduct() {
   
     if (file) {
       if (file.size > maxSize) {
-        alert("File size exceeds 6MB limit.");
+        toast({description: "File size exceeds 6MB limit"});
         setVideoFile(null);
       } else {
         const url = URL.createObjectURL(file);
@@ -109,10 +110,15 @@ export default function AddProduct() {
       });
 
       const result = await response.json();
-      if (response.ok) {
-        setSuccess(result.message || "Product added successfully!");
-        setError(null);
-      } else {
+      if (response.ok) { 
+        toast({
+          description: result.message || "Product added successfully!",
+        })
+      } else { 
+        toast({
+          variant: "destructive",
+          description: "There was a problem with your request.",
+        })
         setError(result.error || "An error occurred.");
         setSuccess(null);
       }
@@ -336,10 +342,6 @@ export default function AddProduct() {
             {isSubmitting ? "Processing..." : "Add Product"}
           </button>
         </form>
-        
-        {/* Success/Error Messages */}
-        {success && <Message success={success} className="mt-4" />}
-        {error && <Message error={error} className="mt-4" />}
       </div>
     </div>
   );

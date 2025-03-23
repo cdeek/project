@@ -12,7 +12,7 @@ router.post('/', auth, upload.fields([
   ]), async (req, res) => {
 
   if (req.user.role !== "admin") return res.status(403).json({ message: "Access denied" });
-  const { title, description, price, category, keywords } = req.body;
+  const { title, description, price, category, keywords, stocks, customization } = req.body;
 
   try {
     const categoryExists = await Category.findById(category);
@@ -29,6 +29,8 @@ router.post('/', auth, upload.fields([
       keywords,
       images,
       video,
+      stocks,
+      customization
     });
 
     await newProduct.save();

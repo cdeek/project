@@ -30,7 +30,7 @@ const start = async () => {
     // await connectDb(); 
 
     // Initialize Next.js
-    const nextApp = next({ dev, turbo: true }); 
+    const nextApp = next({ dev, turbo: false }); 
     const nextHandler = nextApp.getRequestHandler(); 
 
     // Prepare Next.js app

@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-
+import { useToast } from "@/components/ui/use-toast";
 import {
   Card,
   CardContent,
@@ -15,9 +15,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Message } from "@/components/Message";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/app/_providers/Auth";
+import { Button } from "@/components/ui/button";
 
 type FormData = {
   email: string;
@@ -42,6 +42,7 @@ const RegisterForm: React.FC = () => {
    },[])
   
   const Icon = showPassword ? Eye : EyeOff;
+  const { toast } = useToast();
 
   const {
     register,
@@ -59,7 +60,7 @@ const RegisterForm: React.FC = () => {
       if (redirect?.current) router.push(redirect.current as string);
       else router.push("/");
     } catch (err) {
-      setError(err.message);
+      toast({variant: "destructive", description: err.message})
     }
   }
   
@@ -130,5 +131,5 @@ const RegisterForm: React.FC = () => {
   );
 };
 
-export default LoginForm;
+export default RegisterForm;
 

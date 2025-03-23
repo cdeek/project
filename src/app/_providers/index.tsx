@@ -4,7 +4,7 @@ import React from "react";
 import { AuthProvider } from "./Auth";
 import { CartProvider } from "./Cart";
 import { ThemeProvider } from "./Theme"; 
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from '../../components/ui/toaster';
 
 const Providers: React.FC<{
   children: React.ReactNode;

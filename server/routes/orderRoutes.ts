@@ -7,7 +7,7 @@ const router = express.Router();
 // Create an Order (Checkout)
 router.post("/", auth, async (req, res) => {
   try {
-    const { products, shippingAddress, name, email, phone } = req.body;
+    const { products, shippingAddress, user, name, email, phone } = req.body;
 
     if (!products || products.length === 0) return res.status(400).json({ message: "No products in the order" });
 
@@ -26,7 +26,10 @@ router.post("/", auth, async (req, res) => {
 
     // Create order
     const order = new Order({
-      user: req.user._id || { email, name, phone },
+      user,
+      email, 
+      name, 
+      phone,
       products,
       totalAmount,
       shippingAddress,

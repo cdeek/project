@@ -5,9 +5,13 @@ import React, { useState } from "react";
 import {
   LineChart,
   Line,
+  Tooltip,
+  Legend,
   XAxis,
   YAxis,
   CartesianGrid,
+  BarChart,
+  Bar,
   ResponsiveContainer,
 } from 'recharts';
 import {
@@ -26,64 +30,81 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import data from '@/data/analytics';
+const AnalyticsChart = ({ salesData }) => {
+  const [filteredData, setFilteredData] = useState(salesData["salesPerMonth"]);
+  const [selectedOption, setSelectedOption] = useState("salesPerMonth");
 
-const availableFilters = [
-  {
-    value: "uv",
-    label: "Unique Visitors",
-  },
-  {
-    value: "pv",
-    label: "Page Views",
-  },
-  {
-    value: "amt",
-    label: "Amount",
-  }
-]
-
-const AnalyticsChart = () => {
-
-  const [selection, setSelection] = useState("pv");
-
+  const handleSelectChange = (e) => {
+    setSelectedOption(e);
+    setFilteredData(salesData[e]);
+  };
+  
   return (
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Analytics For This Year</CardTitle>
-          <CardDescription>Views Per Month</CardDescription>
-          <Select onValueChange={setSelection} defaultValue="pv">
+          <CardTitle>Analytics</CardTitle>
+          <CardDescription>Views {selectedOption}</CardDescription>
+          <Select onValueChange={handleSelectChange} defaultValue="salesPerMonth">
           <SelectTrigger className="w-96 h-8">
-            <SelectValue placeholder="Select Account" />
+            <SelectValue placeholder="Select by time" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-             {availableFilters.map((filter) => (
-                <SelectItem key={filter.value} value={filter.value}>
-                  {filter.label}
-                </SelectItem>
-              ))}
+              <SelectItem value="salesPerDay">
+                Daily sales
+              </SelectItem>
+              <SelectItem value="salesPerMonth">
+                Monthly sales
+              </SelectItem>
+              <SelectItem value="salesPerYear">
+                yearly sales
+              </SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
         </CardHeader>
         <CardContent>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <LineChart width={1100} height={300} data={data}>
-                <Line type='monotone' dataKey={selection} stroke='#8884d8' />
-                <CartesianGrid stroke='#ccc' />
-                <XAxis dataKey='name' />
-                <YAxis />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+         <ResponsiveContainer width="100%" height={350}>
+          <BarChart data={filteredData}>
+           <CartesianGrid strokeDasharray="3 3" />
+           <XAxis
+            dataKey="_id"
+            stroke="#888888"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+           />
+           <YAxis
+            stroke="#888888"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => `$${value}`}
+           />
+           <Tooltip />
+           <Legend />
+           <Bar
+            dataKey="totalRevenue"
+            name="Revenue"
+            fill="currentColor"
+            radius={[4, 4, 0, 0]}
+            className="fill-primary"
+           />
+           <Bar
+            dataKey="totalOrders"
+            name="Orders"
+            fill="#8884d8"
+            radius={[4, 4, 0, 0]}
+            className="fill-primary"
+           />
+          </BarChart>
+         </ResponsiveContainer>
         </CardContent>
       </Card>
     </>
-  );
-};
+  ); 
+}
 
 export default AnalyticsChart;
 

@@ -8,7 +8,6 @@ const UserSchema = new Schema({
   cart: {
     items: { type: Schema.Types.Mixed, default: null }
   }, 
-  publishedProducts: [mongoose.Schema.Types.ObjectId],
   isReturningCustomer: {type: Boolean, default: false},
   disabled: {type: Boolean, default: false},
   password: { type: String, required: true },
@@ -26,11 +25,13 @@ const ReviewSchema = new mongoose.Schema(
 );
 
 const ProductSchema = new Schema({
-  price: { type: String, default: null }, 
+  title: { type: String, required: true},
+  price: { type: String, required: true}, 
   description: String,
-  category: { type: Schema.Types.ObjectId, ref: 'Category', required: true},
+  category: { type: Schema.Types.Mixed, required: true},
   images: [String],
-  video: String, 
+  video: String,
+  customization: Schema.Types.Mixed,
   keywords: [String],
   stocks: {type: Number, required: true, default: 0},
   reviews: [ReviewSchema],

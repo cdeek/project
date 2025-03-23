@@ -1,15 +1,19 @@
-import Navbar from '@/components/dashboard/Navbar';
 import Sidebar from '@/components/dashboard/Sidebar';
-
+import ModeToggle from '@/components/ModeToggle';
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <section>
-      <Navbar />
       <div className='flex'>
         <div className='hidden md:block h-[100vh] w-[300px]'>
           <Sidebar />
         </div>
-        <div className='p-5 w-full md:max-w-[1140px]'>{children}</div>
+        <div className='p-5 w-full md:max-w-[1140px]'>
+          <span className="flex items-center justify-between pb-4">
+            <h2>DASHBOARD</h2>
+            <ModeToggle />
+          </span>
+          {children}
+        </div>
       </div>
     </section>
   );

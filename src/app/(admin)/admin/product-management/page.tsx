@@ -1,4 +1,4 @@
-import { columns } from "./columns/products"
+import { columns } from "./columns"
 import { DataTable } from "@/components/ui/data-table"
 import {
   Tabs,
